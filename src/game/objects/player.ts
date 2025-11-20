@@ -5,15 +5,36 @@ import {Missile} from "./missile.ts";
 
 export class Player {
     readonly #canvas: Canvas;
+    #missile: Missile | undefined;
 
     constructor(canvas: Canvas) {
         this.#canvas = canvas;
+        this.#missile = undefined;
         this.#registerMouseControlListener();
         this.#addPlayerToCanvas();
     }
 
     #fire(angle: number): void {
-        new Missile(this.#canvas, this.#canvas.getContext().canvas.width / 2, this.#canvas.getContext().canvas.height / 2, angle, 10);
+        if (this.#missile) {
+            console.debug(`[Player] missile cannot be fired. Missile #${this.#missile.getId()} is still active`);
+            return;
+        }
+        const onDestroy = (id: string) => {
+            this.#canvas.removeObject(id);
+            this.#missile = undefined;
+            return true;
+        }
+        const missile = new Missile(
+            this.#canvas,
+            this.#canvas.getContext().canvas.width / 2,
+            this.#canvas.getContext().canvas.height / 2,
+            angle,
+            10,
+            5,
+            onDestroy
+        );
+        this.#missile = missile;
+        console.debug(`[Player] firing new missile #${missile.getId()}`);
     }
 
     #registerMouseControlListener() {

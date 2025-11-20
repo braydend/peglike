@@ -29,10 +29,10 @@ export class Canvas {
 
     beginRenderLoop(): void {
         const renderLoop = () => {
-            const collisionObjects = this.#getCollisionObjects();
-            for (const key of collisionObjects) {
-                this.#objects.delete(key);
-            }
+            // const collisionObjects = this.#getCollidedObjectKeys();
+            // for (const key of collisionObjects) {
+            //     this.#objects.delete(key);
+            // }
             this.#redraw();
             requestAnimationFrame(renderLoop);
         };
@@ -46,7 +46,7 @@ export class Canvas {
         }
     }
 
-    #getCollisionObjects(): Set<string> {
+    getCollidedObjectKeys(): Set<string> {
         const missleKeys = Array.from(this.#objects.keys()).filter(key => key.startsWith('missile-'));
         const brickKeys = Array.from(this.#objects.keys()).filter(key => key.startsWith('brick-'));
         const missles = missleKeys.map(key => {
@@ -59,6 +59,7 @@ export class Canvas {
             }
             return {key, object};
         }).filter((obj) => obj !== undefined);
+        // This doesn't do much since we already do a soft filter for bricks by their ids
         const bricks = brickKeys.map(key => {
             if (!this.#objects.has(key)) {
                 return undefined;
@@ -93,6 +94,7 @@ export class Canvas {
     }
 
     removeObject(id: string): void {
+        console.debug(`[Canvas] removing object #${id}`);
         this.#objects.delete(id);
     }
 
