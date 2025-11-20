@@ -23,6 +23,7 @@ export class Player {
         const onDestroy = (id: string) => {
             this.#canvas.removeObject(id);
             this.#missile = undefined;
+            this.#updatePlayer();
             return true;
         }
         const missile = new Missile(
@@ -45,12 +46,13 @@ export class Player {
         };
         const onMouseMove = (x: number, y: number) => {
             const angle = getAngleBetweenPoints(x,y, canvasCenter.x, canvasCenter.y);
-            this.#updatePlayer(angle);
+            this.#updatePlayerWithAngle(angle);
         }
 
         const onMouseClick = (x: number, y: number) => {
             const angle = getAngleBetweenPoints(x,y, canvasCenter.x, canvasCenter.y);
             this.#fire(angle);
+            this.#updatePlayerWithAngle(angle);
         }
 
         new MouseControl(onMouseMove, onMouseClick);
@@ -66,11 +68,23 @@ export class Player {
             x: canvasCenter.x,
             y: canvasCenter.y,
             sideLength: 20,
-            angle: 0
+            angle: 0,
+            strokeColour: 'green',
         });
     }
 
-    #updatePlayer(angle: number): void {
+    #updatePlayer(): void {
+        const playerInstance = this.#canvas.getObject(PLAYER_ID);
+
+        if (!playerInstance || playerInstance.shapeType !== "EquilateralTriangle") {
+            return;
+        }
+        const currentAngle = playerInstance.angle;
+
+        this.#updatePlayerWithAngle(currentAngle);
+    }
+
+    #updatePlayerWithAngle(angle: number): void {
         const canvasCenter = {
             x: this.#canvas.getContext().canvas.width / 2,
             y: this.#canvas.getContext().canvas.height / 2
@@ -80,7 +94,8 @@ export class Player {
             x: canvasCenter.x,
             y: canvasCenter.y,
             sideLength: 20,
-            angle
+            angle,
+            strokeColour: this.#missile ? 'red' : 'green'
         });
     }
 }

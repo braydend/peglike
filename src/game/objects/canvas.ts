@@ -3,7 +3,7 @@ import {
     drawCircle,
     drawEquilateralTriangle, drawRectangle,
     type EquilateralTriangle, type Rectangle,
-} from "../../canvas/shapes.ts";
+} from "../../renderer/canvas/shapes.ts";
 import {Logger} from "../../logger/logger.ts";
 
 type SupportedObjects = EquilateralTriangle | Circle | Rectangle;
@@ -30,10 +30,6 @@ export class Canvas {
 
     beginRenderLoop(): void {
         const renderLoop = () => {
-            // const collisionObjects = this.#getCollidedObjectKeys();
-            // for (const key of collisionObjects) {
-            //     this.#objects.delete(key);
-            // }
             this.#redraw();
             requestAnimationFrame(renderLoop);
         };

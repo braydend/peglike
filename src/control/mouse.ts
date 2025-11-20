@@ -1,11 +1,8 @@
 export class MouseControl {
-    #x: number;
-    #y: number;
+    #x = 0;
+    #y = 0;
 
     constructor(onMouseMove: (x: number, y: number) => void, onMouseClick: (x: number, y: number) => void) {
-        this.#x = 0;
-        this.#y = 0;
-
         this.#registerMouseMoveListener(onMouseMove)
         this.#registerMouseClickListener(onMouseClick)
     }
