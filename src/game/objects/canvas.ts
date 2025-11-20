@@ -4,6 +4,7 @@ import {
     drawEquilateralTriangle, drawRectangle,
     type EquilateralTriangle, type Rectangle,
 } from "../../canvas/shapes.ts";
+import {Logger} from "../../logger/logger.ts";
 
 type SupportedObjects = EquilateralTriangle | Circle | Rectangle;
 
@@ -94,7 +95,7 @@ export class Canvas {
     }
 
     removeObject(id: string): void {
-        console.debug(`[Canvas] removing object #${id}`);
+        Logger.debug(`[Canvas] removing object #${id}`);
         this.#objects.delete(id);
     }
 

@@ -2,6 +2,7 @@ import {getAngleBetweenPoints} from "../../math/trigonometry.ts";
 import {MouseControl} from "../../control/mouse.ts";
 import {type Canvas, PLAYER_ID} from "./canvas.ts";
 import {Missile} from "./missile.ts";
+import {Logger} from "../../logger/logger.ts";
 
 export class Player {
     readonly #canvas: Canvas;
@@ -16,7 +17,7 @@ export class Player {
 
     #fire(angle: number): void {
         if (this.#missile) {
-            console.debug(`[Player] missile cannot be fired. Missile #${this.#missile.getId()} is still active`);
+            Logger.debug(`[Player] missile cannot be fired. Missile #${this.#missile.getId()} is still active`);
             return;
         }
         const onDestroy = (id: string) => {
@@ -34,7 +35,7 @@ export class Player {
             onDestroy
         );
         this.#missile = missile;
-        console.debug(`[Player] firing new missile #${missile.getId()}`);
+        Logger.debug(`[Player] firing new missile #${missile.getId()}`);
     }
 
     #registerMouseControlListener() {

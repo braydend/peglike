@@ -1,5 +1,6 @@
 import type {Canvas} from "./canvas.ts";
 import type {Rectangle} from "../../canvas/shapes.ts";
+import {Logger} from "../../logger/logger.ts";
 
 interface Position {
     x: number;
@@ -92,7 +93,7 @@ export class Missile {
     #getBounceVector(): {vector: Vector, position: Position}|undefined {
         const collidedObjectKeys = this.#canvas.getCollidedObjectKeys();
         for (const objectKey of collidedObjectKeys) {
-            console.debug(`[Missile #${this.#id}] collided with object #${objectKey}`);
+            Logger.debug(`[Missile #${this.#id}] collided with object #${objectKey}`);
 
             const collidedObject = this.#canvas.getObject(objectKey);
             if (!collidedObject) continue;
