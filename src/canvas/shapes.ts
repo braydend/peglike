@@ -1,5 +1,7 @@
 export interface Shape {
     shapeType: string;
+    x: number;
+    y: number;
 }
 
 export type EquilateralTriangle = {
