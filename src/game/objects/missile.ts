@@ -1,5 +1,5 @@
 import type {Canvas} from "./canvas.ts";
-import type {Rectangle} from "../../canvas/shapes.ts";
+import type {Rectangle} from "../../renderer/canvas/shapes.ts";
 import {Logger} from "../../logger/logger.ts";
 
 interface Position {
