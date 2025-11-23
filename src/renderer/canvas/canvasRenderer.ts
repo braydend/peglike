@@ -1,24 +1,16 @@
 import {
-    type Circle,
     drawCircle,
     drawEquilateralTriangle, drawRectangle,
-    type EquilateralTriangle, type Rectangle,
 } from "./shapes.ts";
-import {Logger} from "../../logger/logger.ts";
-import type {Renderer} from "../renderer.ts";
+import type {RendererInterface} from "../rendererInterface.ts";
+import type {Game} from "../../game/game.ts";
+import type {Brick} from "../../game/objects/brick.ts";
 
-type SupportedObjects = EquilateralTriangle | Circle | Rectangle;
-
-export const PLAYER_ID = 'player';
-
-export class CanvasRenderer implements Renderer{
-    #objects: Map<string, SupportedObjects>;
+export class CanvasRenderer implements RendererInterface{
     #context: CanvasRenderingContext2D;
-    #onRedraw: () => void;
+    #game: Game|undefined = undefined;
 
-    constructor(element: HTMLElement, onRedraw= () => {}) {
-        this.#objects = new Map();
-
+    constructor(element: HTMLElement) {
         if (!this.#isCanvasElement(element)) {
             throw new Error('Provided element is not a canvas element.');
         }
@@ -28,11 +20,21 @@ export class CanvasRenderer implements Renderer{
             throw new Error('Could not get 2D context from canvas element.');
         }
         this.#context = context;
-        this.#onRedraw = onRedraw;
     }
 
-    setOnRedraw(callback: () => void): void {
-        this.#onRedraw = callback;
+    getCenter(): { x: number; y: number } {
+        return {
+            x: this.#context.canvas.width / 2,
+            y: this.#context.canvas.height / 2
+        };
+    }
+
+    setGame(game: Game): void {
+        this.#game = game;
+    }
+
+    getContext() {
+        return this.#context;
     }
 
     beginRenderLoop(): void {
@@ -43,95 +45,77 @@ export class CanvasRenderer implements Renderer{
         requestAnimationFrame(renderLoop);
     }
 
-    #redraw(): void {
-        this.#context.clearRect(0, 0, this.#context.canvas.width, this.#context.canvas.height);
-        for (const object of this.#objects.values()) {
-            this.#drawShape(object);
+    #getGameOrThrow(): Game {
+        if (!this.#game) {
+            throw new Error('Game instance is not set in renderer.');
         }
-        this.#onRedraw();
+        return this.#game;
     }
 
-    getCollidedObjectKeys(): Set<string> {
-        const missleKeys = Array.from(this.#objects.keys()).filter(key => key.startsWith('missile-'));
-        const brickKeys = Array.from(this.#objects.keys()).filter(key => key.startsWith('brick-'));
-        const missles = missleKeys.map(key => {
-            if (!this.#objects.has(key)) {
-                return undefined;
-            }
-            const object = this.#objects.get(key)!;
-            if (object.shapeType !== 'Circle') {
-                return undefined;
-            }
-            return {key, object};
-        }).filter((obj) => obj !== undefined);
-        // This doesn't do much since we already do a soft filter for bricks by their ids
-        const bricks = brickKeys.map(key => {
-            if (!this.#objects.has(key)) {
-                return undefined;
-            }
-            const object = this.#objects.get(key)!;
-            if (object.shapeType !== 'Rectangle') {
-                return undefined;
-            }
-            return {key, object};
-        }).filter((obj) => obj !== undefined);
+    #clearCanvas(): void {
+        this.#context.clearRect(0, 0, this.#context.canvas.width, this.#context.canvas.height);
+    }
 
-        return new Set(bricks.map(({key , object: {x,y, width, height}}) => missles.filter(
-            ({object:{x: mx, y: my, radius}}) =>
-                mx + radius > x &&
-                mx - radius < x + width &&
-                my + radius > y &&
-                my - radius < y + height
-        ).length > 0 ? key : undefined).filter((key) => key !== undefined));
+    #redraw(): void {
+        this.#clearCanvas();
+        this.#drawPlayer();
+        this.#drawMissile();
+        for (const brick of this.#getGameOrThrow().getBricks()) {
+            this.#drawBrick(brick);
+        }
+    }
 
+    #drawPlayer(): void {
+        const player = this.#getGameOrThrow().getPlayer();
+        const canvasCenter = {
+            x: this.#context.canvas.width / 2,
+            y: this.#context.canvas.height / 2
+        }
+
+        drawEquilateralTriangle(this.#context, {
+            x: canvasCenter.x,
+            y: canvasCenter.y,
+            sideLength: 20,
+            angle: player.getAngle(),
+            strokeColour: player.canFire() ? 'green' : 'red',
+        });
+    }
+
+    #drawBrick(brick: Brick): void {
+        drawRectangle(this.#context, {
+            x: brick.getPosition().x,
+            y: brick.getPosition().y,
+            width: brick.getSize().width,
+            height: brick.getSize().height,
+        });
+    }
+
+    #drawMissile(): void {
+        const player = this.#getGameOrThrow().getPlayer();
+        const missile = player.getMissile();
+        if (!missile) {
+            return;
+        }
+
+        if (this.#isOutsideCanvas(missile.getPosition().x, missile.getPosition().y)) {
+            player.removeMissile();
+        }
+
+        drawCircle(this.#context, {
+            x: missile.getPosition().x,
+            y: missile.getPosition().y,
+            radius: missile.getRadius(),
+        });
     }
 
     #isCanvasElement(element: HTMLElement): element is HTMLCanvasElement {
         return element.tagName === 'CANVAS';
     }
 
-    getContext(): CanvasRenderingContext2D {
-        return this.#context;
-    }
-
-    addObject(id: string, object: SupportedObjects): void {
-        this.#objects.set(id, object);
-    }
-
-    removeObject(id: string): void {
-        Logger.debug(`[Canvas] removing object #${id}`);
-        this.#objects.delete(id);
-    }
-
-    getObject(id: string): SupportedObjects | undefined {
-        return this.#objects.get(id);
-    }
-
-    clearObjects(): void {
-        this.#objects.clear();
-    }
-
-    updateObject(id: string, object: SupportedObjects): void {
-        if (this.#objects.has(id)) {
-            this.#objects.set(id, object);
-        } else {
-            throw new Error(`Object with id ${id} does not exist.`);
-        }
-    }
-
-    #drawShape(shape: SupportedObjects): void {
-        switch (shape.shapeType) {
-            case 'EquilateralTriangle':
-                drawEquilateralTriangle(this.#context, shape);
-                break;
-            case 'Circle':
-                drawCircle(this.#context, shape);
-                break;
-            case 'Rectangle':
-                drawRectangle(this.#context, shape);
-                break;
-            default:
-                throw new Error(`Unsupported shape type:`);
-        }
+    #isOutsideCanvas(x:number, y:number): boolean {
+        if (x < 0) return true;
+        if (y < 0) return true;
+        if (x > this.getContext().canvas.width) return true;
+        return y > this.getContext().canvas.height;
     }
 }

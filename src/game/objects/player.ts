@@ -1,18 +1,35 @@
 import {getAngleBetweenPoints} from "../../math/trigonometry.ts";
 import {MouseControl} from "../../control/mouse.ts";
-import {type CanvasRenderer, PLAYER_ID} from "../../renderer/canvas/canvasRenderer.ts";
 import {Missile} from "./missile.ts";
 import {Logger} from "../../logger/logger.ts";
+import {Game} from "../game.ts";
 
 export class Player {
-    readonly #canvas: CanvasRenderer;
+    readonly #game: Game;
     #missile: Missile | undefined;
+    #angle: number;
 
-    constructor(canvas: CanvasRenderer) {
-        this.#canvas = canvas;
+    constructor(game: Game) {
+        this.#game = game;
         this.#missile = undefined;
+        this.#angle = 0;
         this.#registerMouseControlListener();
-        this.#addPlayerToCanvas();
+    }
+
+    getMissile(): Missile | undefined {
+        return this.#missile;
+    }
+
+    getAngle(): number {
+        return this.#angle;
+    }
+
+    canFire(): boolean {
+        return this.#missile === undefined;
+    }
+
+    removeMissile(): void {
+        this.#missile = undefined;
     }
 
     #fire(angle: number): void {
@@ -20,82 +37,30 @@ export class Player {
             Logger.debug(`[Player] missile cannot be fired. Missile #${this.#missile.getId()} is still active`);
             return;
         }
-        const onDestroy = (id: string) => {
-            this.#canvas.removeObject(id);
-            this.#missile = undefined;
-            this.#updatePlayer();
-            return true;
-        }
         const missile = new Missile(
-            this.#canvas,
-            this.#canvas.getContext().canvas.width / 2,
-            this.#canvas.getContext().canvas.height / 2,
+            this.#game,
+            this.#game.getRenderer().getCenter().x,
+            this.#game.getRenderer().getCenter().y,
             angle,
             10,
             5,
-            onDestroy
         );
         this.#missile = missile;
         Logger.debug(`[Player] firing new missile #${missile.getId()}`);
     }
 
     #registerMouseControlListener() {
-        const canvasCenter = {
-            x: this.#canvas.getContext().canvas.width / 2,
-            y: this.#canvas.getContext().canvas.height / 2
-        };
+        const canvasCenter = this.#game.getRenderer().getCenter();
         const onMouseMove = (x: number, y: number) => {
-            const angle = getAngleBetweenPoints(x,y, canvasCenter.x, canvasCenter.y);
-            this.#updatePlayerWithAngle(angle);
+            this.#angle = getAngleBetweenPoints(x,y, canvasCenter.x, canvasCenter.y);
         }
 
         const onMouseClick = (x: number, y: number) => {
             const angle = getAngleBetweenPoints(x,y, canvasCenter.x, canvasCenter.y);
             this.#fire(angle);
-            this.#updatePlayerWithAngle(angle);
+            this.#angle = angle;
         }
 
         new MouseControl(onMouseMove, onMouseClick);
-    }
-
-    #addPlayerToCanvas(): void {
-        const canvasCenter = {
-            x: this.#canvas.getContext().canvas.width / 2,
-            y: this.#canvas.getContext().canvas.height / 2
-        }
-        this.#canvas.addObject(PLAYER_ID, {
-            shapeType: "EquilateralTriangle",
-            x: canvasCenter.x,
-            y: canvasCenter.y,
-            sideLength: 20,
-            angle: 0,
-            strokeColour: 'green',
-        });
-    }
-
-    #updatePlayer(): void {
-        const playerInstance = this.#canvas.getObject(PLAYER_ID);
-
-        if (!playerInstance || playerInstance.shapeType !== "EquilateralTriangle") {
-            return;
-        }
-        const currentAngle = playerInstance.angle;
-
-        this.#updatePlayerWithAngle(currentAngle);
-    }
-
-    #updatePlayerWithAngle(angle: number): void {
-        const canvasCenter = {
-            x: this.#canvas.getContext().canvas.width / 2,
-            y: this.#canvas.getContext().canvas.height / 2
-        }
-        this.#canvas.updateObject(PLAYER_ID, {
-            shapeType: "EquilateralTriangle",
-            x: canvasCenter.x,
-            y: canvasCenter.y,
-            sideLength: 20,
-            angle,
-            strokeColour: this.#missile ? 'red' : 'green'
-        });
     }
 }

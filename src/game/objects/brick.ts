@@ -1,24 +1,22 @@
-import type {CanvasRenderer} from "../../renderer/canvas/canvasRenderer.ts";
-
 export class Brick {
     #id: string
-    #canvas: CanvasRenderer;
     #position: { x: number; y: number };
+    #size: { width: number; height: number } = { width: 50, height: 20 };
 
-    constructor(canvas: CanvasRenderer, x: number, y: number) {
+    constructor(x: number, y: number) {
         this.#id = `brick-${crypto.randomUUID()}`;
-        this.#canvas = canvas;
         this.#position = { x, y };
-        this.#addToCanvas();
     }
 
-    #addToCanvas(): void {
-        this.#canvas.addObject(this.#id, {
-            shapeType: "Rectangle",
-            x: this.#position.x,
-            y: this.#position.y,
-            width: 50,
-            height: 20
-        });
+    getId(): string {
+        return this.#id;
+    }
+
+    getPosition(): { x: number; y: number } {
+        return this.#position;
+    }
+
+    getSize(): { width: number; height: number } {
+        return this.#size;
     }
 }
