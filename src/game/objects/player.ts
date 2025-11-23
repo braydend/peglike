@@ -1,14 +1,14 @@
 import {getAngleBetweenPoints} from "../../math/trigonometry.ts";
 import {MouseControl} from "../../control/mouse.ts";
-import {type Canvas, PLAYER_ID} from "./canvas.ts";
+import {type CanvasRenderer, PLAYER_ID} from "../../renderer/canvas/canvasRenderer.ts";
 import {Missile} from "./missile.ts";
 import {Logger} from "../../logger/logger.ts";
 
 export class Player {
-    readonly #canvas: Canvas;
+    readonly #canvas: CanvasRenderer;
     #missile: Missile | undefined;
 
-    constructor(canvas: Canvas) {
+    constructor(canvas: CanvasRenderer) {
         this.#canvas = canvas;
         this.#missile = undefined;
         this.#registerMouseControlListener();

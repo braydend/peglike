@@ -1,11 +1,11 @@
-import type {Canvas} from "./canvas.ts";
+import type {CanvasRenderer} from "../../renderer/canvas/canvasRenderer.ts";
 
 export class Brick {
     #id: string
-    #canvas: Canvas;
+    #canvas: CanvasRenderer;
     #position: { x: number; y: number };
 
-    constructor(canvas: Canvas, x: number, y: number) {
+    constructor(canvas: CanvasRenderer, x: number, y: number) {
         this.#id = `brick-${crypto.randomUUID()}`;
         this.#canvas = canvas;
         this.#position = { x, y };

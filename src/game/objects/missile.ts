@@ -1,4 +1,4 @@
-import type {Canvas} from "./canvas.ts";
+import type {CanvasRenderer} from "../../renderer/canvas/canvasRenderer.ts";
 import type {Rectangle} from "../../renderer/canvas/shapes.ts";
 import {Logger} from "../../logger/logger.ts";
 
@@ -16,12 +16,12 @@ export class Missile {
     #id: string;
     #position: Position;
     #velocity: Vector;
-    #canvas: Canvas;
+    #canvas: CanvasRenderer;
     #radius: number;
     #onDestroy: (id: string) => boolean;
     #isDestroyed = false;
 
-    constructor(canvas: Canvas, startX: number, startY: number, angle: number, speed: number, radius = 5, onDestroy: (id: string) => boolean) {
+    constructor(canvas: CanvasRenderer, startX: number, startY: number, angle: number, speed: number, radius = 5, onDestroy: (id: string) => boolean) {
         this.#id = `missile-${crypto.randomUUID()}`;
         this.#canvas = canvas;
         this.#position = { x: startX, y: startY };

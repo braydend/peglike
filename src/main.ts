@@ -1,10 +1,10 @@
 import './style.css'
 import {Player} from "./game/objects/player.ts";
-import {Canvas} from "./game/objects/canvas.ts";
+import {CanvasRenderer} from "./renderer/canvas/canvasRenderer.ts";
 import {Brick} from "./game/objects/brick.ts";
 
 type InitialisedPage = {
-    mainCanvas: Canvas;
+    mainCanvas: CanvasRenderer;
 }
 
 function init(): InitialisedPage {
@@ -14,7 +14,7 @@ function init(): InitialisedPage {
         throw new Error('Could not find the main canvas');
     }
 
-    const mainCanvas = new Canvas(canvasElement);
+    const mainCanvas = new CanvasRenderer(canvasElement);
 
     return  {
         mainCanvas

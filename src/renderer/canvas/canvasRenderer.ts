@@ -3,18 +3,20 @@ import {
     drawCircle,
     drawEquilateralTriangle, drawRectangle,
     type EquilateralTriangle, type Rectangle,
-} from "../../renderer/canvas/shapes.ts";
+} from "./shapes.ts";
 import {Logger} from "../../logger/logger.ts";
+import type {Renderer} from "../renderer.ts";
 
 type SupportedObjects = EquilateralTriangle | Circle | Rectangle;
 
 export const PLAYER_ID = 'player';
 
-export class Canvas {
+export class CanvasRenderer implements Renderer{
     #objects: Map<string, SupportedObjects>;
     #context: CanvasRenderingContext2D;
+    #onRedraw: () => void;
 
-    constructor(element: HTMLElement) {
+    constructor(element: HTMLElement, onRedraw= () => {}) {
         this.#objects = new Map();
 
         if (!this.#isCanvasElement(element)) {
@@ -26,6 +28,11 @@ export class Canvas {
             throw new Error('Could not get 2D context from canvas element.');
         }
         this.#context = context;
+        this.#onRedraw = onRedraw;
+    }
+
+    setOnRedraw(callback: () => void): void {
+        this.#onRedraw = callback;
     }
 
     beginRenderLoop(): void {
@@ -41,6 +48,7 @@ export class Canvas {
         for (const object of this.#objects.values()) {
             this.#drawShape(object);
         }
+        this.#onRedraw();
     }
 
     getCollidedObjectKeys(): Set<string> {
@@ -99,7 +107,7 @@ export class Canvas {
         return this.#objects.get(id);
     }
 
-    clear(): void {
+    clearObjects(): void {
         this.#objects.clear();
     }
 
