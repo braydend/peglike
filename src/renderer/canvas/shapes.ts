@@ -20,7 +20,7 @@ const resetColours = (ctx: CanvasRenderingContext2D) => {
     ctx.fillStyle = 'black';
 }
 
-export function drawEquilateralTriangle(ctx: CanvasRenderingContext2D, {x,y,angle,sideLength, strokeColour}: EquilateralTriangle) {
+export function drawEquilateralTriangle(ctx: CanvasRenderingContext2D, {x,y,angle,sideLength, strokeColour}: Omit<EquilateralTriangle, "shapeType">) {
     const calculatedAngle = angle - Math.PI / 3;
     ctx.beginPath();
     ctx.moveTo(
@@ -48,7 +48,7 @@ export type Circle = {
     radius: number;
 }
 
-export function drawCircle(ctx: CanvasRenderingContext2D,{x,y,radius}: Circle) {
+export function drawCircle(ctx: CanvasRenderingContext2D,{x,y,radius}: Omit<Circle, 'shapeType'>) {
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI);
     ctx.stroke();
@@ -63,7 +63,7 @@ export type Rectangle = {
     height: number;
 }
 
-export function drawRectangle(ctx: CanvasRenderingContext2D, {x,y,width,height}: Rectangle) {
+export function drawRectangle(ctx: CanvasRenderingContext2D, {x,y,width,height}: Omit<Rectangle, "shapeType">) {
     ctx.beginPath();
     ctx.rect(x, y, width, height);
     ctx.stroke();
