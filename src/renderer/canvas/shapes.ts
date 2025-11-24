@@ -61,7 +61,7 @@ export type Circle = {
 export function drawCircle(
     ctx: CanvasRenderingContext2D,
     {position:{x,y},radius}: Omit<Circle, 'shapeType'>,
-    extraOptions?: ExtraRenderOptions
+    _?: ExtraRenderOptions
 ) {
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI);
@@ -79,7 +79,7 @@ export type Rectangle = {
 export function drawRectangle(
     ctx: CanvasRenderingContext2D,
     {position:{x,y},width,height}: Omit<Rectangle, "shapeType">,
-    extraOptions?: ExtraRenderOptions
+    _?: ExtraRenderOptions
     ) {
     ctx.beginPath();
     ctx.rect(x, y, width, height);
