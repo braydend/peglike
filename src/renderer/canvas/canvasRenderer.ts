@@ -59,11 +59,45 @@ export class CanvasRenderer implements RendererInterface{
 
     #redraw(): void {
         this.#clearCanvas();
+        if (globalThis.debug) {
+            this.#debug();
+        }
         this.#renderPlayer();
         this.#renderMissile();
         for (const brick of this.#getGameOrThrow().getBricks()) {
             this.#renderBrick(brick);
         }
+    }
+
+    #debug(): void {
+        this.#renderCenterPoint();
+        const ctx = this.#context;
+        const centerPoint = this.getCenter();
+        const playerAngle = this.#getGameOrThrow().getPlayer().getAngle();
+        // draw line from center in the same direction the missile will travel
+        // missile velocity uses -cos/-sin of the angle, so mirror the debug line accordingly
+        const length = Math.max(ctx.canvas.width, ctx.canvas.height);
+        const targetX = centerPoint.x - length * Math.cos(playerAngle);
+        const targetY = centerPoint.y - length * Math.sin(playerAngle);
+        ctx.beginPath();
+        ctx.moveTo(centerPoint.x, centerPoint.y);
+        ctx.lineTo(targetX, targetY);
+        ctx.stroke();
+    }
+
+    #renderCenterPoint(): void {
+        const ctx = this.#context;
+        const centerPoint = this.getCenter();
+        const pathBounds = [{x: 10}, {x:-10}, {y: 10}, {y:-10}];
+        ctx.beginPath();
+        for (const pathBound of pathBounds) {
+            ctx.moveTo(centerPoint.x, centerPoint.y);
+            const targetY = pathBound.y ? centerPoint.y + pathBound.y : centerPoint.y;
+            const targetX = pathBound.x ? centerPoint.x + pathBound.x : centerPoint.x;
+            ctx.lineTo(targetX, targetY);
+        }
+        ctx.closePath();
+        ctx.stroke();
     }
 
     #renderPlayer(): void {
