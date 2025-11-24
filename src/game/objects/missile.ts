@@ -1,29 +1,20 @@
 import {Logger} from "../../logger/logger.ts";
 import type {Game} from "../game.ts";
 import type {Brick} from "./brick.ts";
-
-interface Position {
-    x: number;
-    y: number;
-}
-
-interface Vector {
-    x: number;
-    y: number;
-}
+import type {Position, Velocity} from "../../math/vector.ts";
 
 export class Missile {
     #id: string;
     #position: Position;
-    #velocity: Vector;
+    #velocity: Velocity;
     #game: Game;
     #radius: number;
     #isDestroyed = false;
 
-    constructor( game: Game, startX: number, startY: number, angle: number, speed: number, radius = 5) {
+    constructor( game: Game, startPosition: Position, angle: number, speed: number, radius = 5) {
         this.#id = `missile-${crypto.randomUUID()}`;
         this.#game = game;
-        this.#position = { x: startX, y: startY };
+        this.#position = startPosition;
         this.#velocity = {
             x: -speed * Math.cos(angle),
             y: -speed * Math.sin(angle)
@@ -40,7 +31,7 @@ export class Missile {
         return this.#position;
     }
 
-    getVelocity(): Vector {
+    getVelocity(): Velocity {
         return this.#velocity;
     }
 
@@ -59,19 +50,19 @@ export class Missile {
     }
 
     #updatePosition(): void {
-        this.#position.x += this.#velocity.x;
-        this.#position.y += this.#velocity.y;
+        this.#position = {
+            x: this.#position.x + this.#velocity.x,
+            y: this.#position.y + this.#velocity.y
+        };
     }
 
     #updateBounce() {
         const {vector, position} = this.#getBounceVector() ?? {vector: this.#velocity, position: this.#position};
-        this.#position.x = position.x;
-        this.#position.y = position.y;
-        this.#velocity.x = vector.x;
-        this.#velocity.y = vector.y;
+        this.#position= position;
+        this.#velocity = vector;
     }
 
-    #getBounceVector(): {vector: Vector, position: Position}|undefined {
+    #getBounceVector(): {vector: Velocity, position: Position}|undefined {
         const collidedBrickIds = this.#game.getCollidedBrickIds();
         for (const collidedBrickId of collidedBrickIds) {
             Logger.debug(`[Missile #${this.#id}] collided with object #${collidedBrickId}`);
@@ -84,7 +75,7 @@ export class Missile {
         }
     }
 
-    #resolveCollision(collidedBrick: Brick): {vector: Vector, position: Position} {
+    #resolveCollision(collidedBrick: Brick): {vector: Velocity, position: Position} {
         const overlapLeft = (this.#position.x + this.#radius) - collidedBrick.getPosition().x;
         const overlapRight = (collidedBrick.getPosition().x + collidedBrick.getSize().width) - (this.#position.x - this.#radius);
         const overlapTop = (this.#position.y + this.#radius) - collidedBrick.getPosition().y;
