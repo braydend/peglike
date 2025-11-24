@@ -5,6 +5,7 @@ import {
 import type {RendererInterface} from "../rendererInterface.ts";
 import type {Game} from "../../game/game.ts";
 import type {Brick} from "../../game/objects/brick.ts";
+import type {Position} from "../../math/vector.ts";
 
 export class CanvasRenderer implements RendererInterface{
     #context: CanvasRenderingContext2D;
@@ -67,14 +68,13 @@ export class CanvasRenderer implements RendererInterface{
 
     #renderPlayer(): void {
         const player = this.#getGameOrThrow().getPlayer();
-        const canvasCenter = {
+        const canvasCenter: Position = {
             x: this.#context.canvas.width / 2,
             y: this.#context.canvas.height / 2
         }
 
         drawEquilateralTriangle(this.#context, {
-            x: canvasCenter.x,
-            y: canvasCenter.y,
+            position: canvasCenter,
             sideLength: 20,
             angle: player.getAngle()},
             {
@@ -86,8 +86,7 @@ export class CanvasRenderer implements RendererInterface{
 
     #renderBrick(brick: Brick): void {
         drawRectangle(this.#context, {
-            x: brick.getPosition().x,
-            y: brick.getPosition().y,
+            position: brick.getPosition(),
             width: brick.getSize().width,
             height: brick.getSize().height,
         });
@@ -100,13 +99,12 @@ export class CanvasRenderer implements RendererInterface{
             return;
         }
 
-        if (this.#isOutsideCanvas(missile.getPosition().x, missile.getPosition().y)) {
+        if (this.#isOutsideCanvas(missile.getPosition())) {
             player.removeMissile();
         }
 
         drawCircle(this.#context, {
-            x: missile.getPosition().x,
-            y: missile.getPosition().y,
+            position: missile.getPosition(),
             radius: missile.getRadius(),
         });
     }
@@ -115,7 +113,7 @@ export class CanvasRenderer implements RendererInterface{
         return element.tagName === 'CANVAS';
     }
 
-    #isOutsideCanvas(x:number, y:number): boolean {
+    #isOutsideCanvas({x,y}: Position): boolean {
         if (x < 0) return true;
         if (y < 0) return true;
         if (x > this.getContext().canvas.width) return true;

@@ -1,3 +1,5 @@
+import type {Position} from "../../math/vector.ts";
+
 export interface Shape {
     shapeType: string;
     x: number;
@@ -17,8 +19,7 @@ const resetColours = (ctx: CanvasRenderingContext2D) => {
 
 export type EquilateralTriangle = {
     shapeType: 'EquilateralTriangle';
-    x: number;
-    y: number;
+    position: Position;
     sideLength: number;
     angle: number;
 }
