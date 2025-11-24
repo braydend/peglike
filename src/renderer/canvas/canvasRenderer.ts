@@ -101,6 +101,9 @@ export class CanvasRenderer implements RendererInterface{
 
         if (this.#isOutsideCanvas(missile.getPosition())) {
             player.removeMissile();
+            if (player.getMissilesLeft() === 0) {
+                this.#getGameOrThrow().gameOver();
+            }
         }
 
         drawCircle(this.#context, {

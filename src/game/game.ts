@@ -2,6 +2,7 @@ import type {RendererInterface} from "../renderer/rendererInterface.ts";
 import {Player} from "./objects/player.ts";
 import {Brick} from "./objects/brick.ts";
 import {Logger} from "../logger/logger.ts";
+import {Chrome} from "./chrome/chrome.ts";
 
 export class Game {
     #renderer: RendererInterface;
@@ -61,6 +62,11 @@ export class Game {
                 ) return key;
             }
         ).map(([key]) => key));
+    }
+
+    gameOver(): void {
+        Logger.info("Game Over!");
+        new Chrome().renderGameOverScreen();
     }
 
     #generateBricks(count: number): void {
