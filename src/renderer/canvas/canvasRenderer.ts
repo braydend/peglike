@@ -58,14 +58,14 @@ export class CanvasRenderer implements RendererInterface{
 
     #redraw(): void {
         this.#clearCanvas();
-        this.#drawPlayer();
-        this.#drawMissile();
+        this.#renderPlayer();
+        this.#renderMissile();
         for (const brick of this.#getGameOrThrow().getBricks()) {
-            this.#drawBrick(brick);
+            this.#renderBrick(brick);
         }
     }
 
-    #drawPlayer(): void {
+    #renderPlayer(): void {
         const player = this.#getGameOrThrow().getPlayer();
         const canvasCenter = {
             x: this.#context.canvas.width / 2,
@@ -76,12 +76,15 @@ export class CanvasRenderer implements RendererInterface{
             x: canvasCenter.x,
             y: canvasCenter.y,
             sideLength: 20,
-            angle: player.getAngle(),
-            strokeColour: player.canFire() ? 'green' : 'red',
-        });
+            angle: player.getAngle()},
+            {
+                strokeColour: player.canFire() ? 'green' : 'red',
+                text: player.getMissilesLeft().toString()
+            }
+        );
     }
 
-    #drawBrick(brick: Brick): void {
+    #renderBrick(brick: Brick): void {
         drawRectangle(this.#context, {
             x: brick.getPosition().x,
             y: brick.getPosition().y,
@@ -90,7 +93,7 @@ export class CanvasRenderer implements RendererInterface{
         });
     }
 
-    #drawMissile(): void {
+    #renderMissile(): void {
         const player = this.#getGameOrThrow().getPlayer();
         const missile = player.getMissile();
         if (!missile) {

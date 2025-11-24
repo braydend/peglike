@@ -8,12 +8,17 @@ export class Player {
     readonly #game: Game;
     #missile: Missile | undefined;
     #angle: number;
+    #missilesLeft: number = 10;
 
     constructor(game: Game) {
         this.#game = game;
         this.#missile = undefined;
         this.#angle = 0;
         this.#registerMouseControlListener();
+    }
+
+    getMissilesLeft(): number {
+        return this.#missilesLeft;
     }
 
     getMissile(): Missile | undefined {
@@ -46,6 +51,7 @@ export class Player {
             5,
         );
         this.#missile = missile;
+        this.#missilesLeft -= 1;
         Logger.debug(`[Player] firing new missile #${missile.getId()}`);
     }
 
