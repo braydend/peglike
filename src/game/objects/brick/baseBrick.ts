@@ -1,4 +1,4 @@
-export class Brick {
+export class BaseBrick {
     #id: string
     #position: { x: number; y: number };
     #size: { width: number; height: number } = { width: 50, height: 20 };
