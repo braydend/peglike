@@ -43,7 +43,6 @@ export class Player {
             return;
         }
         const missile = new Missile(
-            this.#game,
             this.#game.getRenderer().getCenter(),
             angle,
             10,
