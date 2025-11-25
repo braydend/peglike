@@ -79,8 +79,15 @@ export type Rectangle = {
 export function drawRectangle(
     ctx: CanvasRenderingContext2D,
     {position:{x,y},width,height}: Omit<Rectangle, "shapeType">,
-    _?: ExtraRenderOptions
-    ) {
+    extraOptions?: ExtraRenderOptions
+) {
+    if (extraOptions?.strokeColour) {
+        ctx.strokeStyle = extraOptions.strokeColour;
+    }
+    if (extraOptions?.fillColour) {
+        ctx.fillStyle = extraOptions.fillColour;
+    }
+
     ctx.beginPath();
     ctx.rect(x, y, width, height);
     ctx.stroke();

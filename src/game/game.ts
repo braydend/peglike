@@ -1,21 +1,35 @@
 import type {RendererInterface} from "../renderer/rendererInterface.ts";
 import {Player} from "./objects/player.ts";
-import {Brick} from "./objects/brick.ts";
 import {Logger} from "../logger/logger.ts";
 import {Chrome} from "./chrome/chrome.ts";
+import type {BaseBrick} from "./objects/brick/baseBrick.ts";
+import {BasicBrick} from "./objects/brick/basicBrick.ts";
+import {GlassBrick} from "./objects/brick/glassBrick.ts";
+import {SteelBrick} from "./objects/brick/steelBrick.ts";
+import {CollisionDetectionService} from "./service/collisionDetectionService.ts";
+import type {Missile} from "./objects/missile.ts";
 
 export class Game {
     #renderer: RendererInterface;
     #player: Player;
-    #bricks: Map<string, Brick>;
+    #bricks: Map<string, BaseBrick>;
+    // TODO: increment this when player clears a level
+    #level = 2;
 
     constructor(renderer: RendererInterface) {
         renderer.setGame(this);
         this.#renderer = renderer;
         this.#player = new Player(this);
-        this.#bricks = new Map<string, Brick>();
-        this.#generateBricks(15);
-        this.#renderer.beginRenderLoop();
+        this.#bricks = new Map<string, BaseBrick>();
+        this.#generateBricks();
+        const collisionDetectionService = new CollisionDetectionService(this);
+        const onFrame = () => {
+            const missile = this.#player.getMissile();
+            if (!missile) return;
+            collisionDetectionService.resolveCollision(missile);
+            this.#updateMissile(missile);
+        }
+        this.#renderer.beginRenderLoop(onFrame);
     }
 
     getPlayer(): Player {
@@ -26,11 +40,11 @@ export class Game {
         this.#player = player;
     }
 
-    getBricks(): Brick[] {
+    getBricks(): BaseBrick[] {
         return Array.from(this.#bricks.values());
     }
 
-    getBrick(id: string): Brick | undefined {
+    getBrick(id: string): BaseBrick | undefined {
         return this.#bricks.get(id);
     }
 
@@ -44,16 +58,15 @@ export class Game {
         return this.#renderer;
     }
 
-    getCollidedBrickIds(): Set<string> {
+    getCollidedBrickId(): string | undefined {
         const missile = this.#player.getMissile();
         if (!missile) {
-            return new Set();
+            return;
         }
 
         const bricks = Array.from(this.#bricks.entries());
 
-        return new Set(
-            bricks.filter(([key, brick]) => {
+        return bricks.filter(([key, brick]) => {
                 if (
                     missile.getPosition().x + missile.getRadius() > brick.getPosition().x &&
                     missile.getPosition().x - missile.getRadius() < brick.getPosition().x + brick.getSize().width &&
@@ -61,7 +74,7 @@ export class Game {
                     missile.getPosition().y - missile.getRadius() < brick.getPosition().y + brick.getSize().height
                 ) return key;
             }
-        ).map(([key]) => key));
+        ).map(([key]) => key).at(0);
     }
 
     gameOver(): void {
@@ -69,14 +82,19 @@ export class Game {
         new Chrome().renderGameOverScreen();
     }
 
-    #generateBricks(count: number): void {
+    #updateMissile(missile: Missile): void {
+        missile.updatePosition();
+    }
+
+    #generateBricks(): void {
         const widthCenter = this.#renderer.getCenter().x;
         const heightCenter = this.#renderer.getCenter().y
         const exclusionZone = { minX: widthCenter - 50, maxX: widthCenter + 50, minY: heightCenter - 50, maxY: heightCenter + 50 };
+        const bricksToGenerate = this.#getBricksForLevel();
 
         let positions: { x: number; y: number }[] = [];
 
-        while (positions.length < count) {
+        while (positions.length < bricksToGenerate.length) {
             const x = Math.floor(Math.random() * (this.#renderer.getContext().canvas.width - 50));
             const y = Math.floor(Math.random() * (this.#renderer.getContext().canvas.height - 20));
 
@@ -87,13 +105,34 @@ export class Game {
             positions.push({ x, y });
         }
 
-        for (const position of positions) {
-            const brick = new Brick(position.x, position.y);
-            this.#addBrick(brick);
+        for (let i = 0; i < bricksToGenerate.length; i++) {
+            const position = positions[i];
+            switch (bricksToGenerate[i]) {
+                case 'basic':
+                    this.#addBrick(new BasicBrick(position.x, position.y));
+                    break;
+                case "glass":
+                    this.#addBrick(new GlassBrick(position.x, position.y));
+                    break;
+                case "steel":
+                    this.#addBrick(new SteelBrick(position.x, position.y));
+                    break;
+            }
         }
     }
 
-    #addBrick(brick: Brick): void {
+    #getBricksForLevel(): ('basic'|'glass'|'steel')[] {
+        if (this.#level === 1) {
+            return new Array(10).fill('basic');
+        }
+
+        return new Array(11)
+            .fill('basic', 0, 6)
+            .fill('glass', 6,9)
+            .fill('steel',9,10);
+    }
+
+    #addBrick(brick: BaseBrick): void {
         this.#bricks.set(brick.getId(), brick);
     }
 }

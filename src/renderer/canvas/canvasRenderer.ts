@@ -4,8 +4,11 @@ import {
 } from "./shapes.ts";
 import type {RendererInterface} from "../rendererInterface.ts";
 import type {Game} from "../../game/game.ts";
-import type {Brick} from "../../game/objects/brick.ts";
 import type {Position} from "../../math/vector.ts";
+import type {BaseBrick} from "../../game/objects/brick/baseBrick.ts";
+import {GlassBrick} from "../../game/objects/brick/glassBrick.ts";
+import {BasicBrick} from "../../game/objects/brick/basicBrick.ts";
+import {SteelBrick} from "../../game/objects/brick/steelBrick.ts";
 
 export class CanvasRenderer implements RendererInterface{
     #context: CanvasRenderingContext2D;
@@ -38,8 +41,9 @@ export class CanvasRenderer implements RendererInterface{
         return this.#context;
     }
 
-    beginRenderLoop(): void {
+    beginRenderLoop(onFrame?: () => void): void {
         const renderLoop = () => {
+            onFrame?.();
             this.#redraw();
             requestAnimationFrame(renderLoop);
         };
@@ -118,7 +122,26 @@ export class CanvasRenderer implements RendererInterface{
         );
     }
 
-    #renderBrick(brick: Brick): void {
+    #renderBrick(brick: BaseBrick): void {
+        if (brick instanceof BasicBrick) {
+            this.#renderBasicBrick(brick);
+            return;
+        }
+
+        if (brick instanceof GlassBrick) {
+            this.#renderGlassBrick(brick);
+            return;
+        }
+
+        if (brick instanceof SteelBrick) {
+            this.#renderSteelBrick(brick);
+            return;
+        }
+
+        throw Error(`Unable to render brick: ${brick.getId()}`)
+    }
+
+    #renderBasicBrick(brick: BasicBrick): void {
         drawRectangle(this.#context, {
             position: brick.getPosition(),
             width: brick.getSize().width,
@@ -126,9 +149,31 @@ export class CanvasRenderer implements RendererInterface{
         });
     }
 
+    #renderGlassBrick(brick: GlassBrick): void {
+        drawRectangle(this.#context, {
+            position: brick.getPosition(),
+            width: brick.getSize().width,
+            height: brick.getSize().height,
+        }, {
+            strokeColour: 'lightBlue',
+        });
+    }
+
+    #renderSteelBrick(brick: SteelBrick): void {
+        drawRectangle(this.#context, {
+            position: brick.getPosition(),
+            width: brick.getSize().width,
+            height: brick.getSize().height,
+        }, {
+            strokeColour: 'lightGray',
+            fillColour: 'lightGray',
+        });
+    }
+
     #renderMissile(): void {
         const player = this.#getGameOrThrow().getPlayer();
         const missile = player.getMissile();
+        console.debug(missile);
         if (!missile) {
             return;
         }
