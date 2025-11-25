@@ -166,8 +166,21 @@ export class CanvasRenderer implements RendererInterface{
             height: brick.getSize().height,
         }, {
             strokeColour: 'lightGray',
-            fillColour: 'lightGray',
+            fillColour: this.#getSteelBrickFillColour(brick),
         });
+    }
+
+    #getSteelBrickFillColour(brick: SteelBrick): string {
+        switch (brick.getHitsRemaining()){
+            case 3:
+                return 'gray'
+            case 2:
+                return 'lightslategray'
+            case 1:
+                return 'darkgray'
+            default:
+                return 'lightgray'
+        }
     }
 
     #renderMissile(): void {

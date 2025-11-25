@@ -84,12 +84,13 @@ export function drawRectangle(
     if (extraOptions?.strokeColour) {
         ctx.strokeStyle = extraOptions.strokeColour;
     }
-    if (extraOptions?.fillColour) {
-        ctx.fillStyle = extraOptions.fillColour;
-    }
 
     ctx.beginPath();
     ctx.rect(x, y, width, height);
+    if (extraOptions?.fillColour) {
+        ctx.fillStyle = extraOptions.fillColour;
+        ctx.fillRect(x, y, width, height);
+    }
     ctx.stroke();
     resetColours(ctx);
 }
