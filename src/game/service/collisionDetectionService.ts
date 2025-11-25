@@ -42,7 +42,6 @@ export class CollisionDetectionService {
             this.#game.removeBrick(collidedBrickId);
         }
 
-        // missile.updateBounce(updatedVectors.position, updatedVectors.vector);
         missile.setVelocity(updatedVectors.vector);
         missile.setPosition(updatedVectors.position);
     }
