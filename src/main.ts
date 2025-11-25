@@ -14,4 +14,10 @@ function init(): Game {
     return new Game(mainCanvas);
 }
 
+const params = new URLSearchParams(window.location.search);
+
+if (params.get('debug')) {
+    globalThis.debug = true;
+}
+
 init();
