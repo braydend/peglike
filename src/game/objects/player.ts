@@ -9,12 +9,17 @@ export class Player {
     #missile: Missile | undefined;
     #angle: number;
     #missilesLeft: number = 10;
+    #mouseControl: MouseControl;
 
     constructor(game: Game) {
         this.#game = game;
         this.#missile = undefined;
         this.#angle = 0;
-        this.#registerMouseControlListener();
+        this.#mouseControl = this.#registerMouseControlListener();
+    }
+
+    getMouseControl(): MouseControl {
+        return this.#mouseControl;
     }
 
     getMissilesLeft(): number {
@@ -53,7 +58,7 @@ export class Player {
         Logger.debug(`[Player] firing new missile #${missile.getId()}`);
     }
 
-    #registerMouseControlListener() {
+    #registerMouseControlListener(): MouseControl {
         const canvasCenter = this.#game.getRenderer().getCenter();
         const onMouseMove = (x: number, y: number) => {
             this.#angle = getAngleBetweenPoints(x,y, canvasCenter.x, canvasCenter.y);
@@ -65,6 +70,6 @@ export class Player {
             this.#angle = angle;
         }
 
-        new MouseControl(onMouseMove, onMouseClick);
+        return new MouseControl(this.#game, onMouseMove, onMouseClick);
     }
 }
