@@ -1,4 +1,3 @@
-import type {RendererInterface} from "../renderer/rendererInterface.ts";
 import {Player} from "./objects/player.ts";
 import {Logger} from "../logger/logger.ts";
 import {Chrome} from "./chrome/chrome.ts";
@@ -10,13 +9,13 @@ import {CollisionDetectionService} from "./service/collisionDetectionService.ts"
 import type {Missile} from "./objects/missile.ts";
 
 export class Game {
-    #renderer: RendererInterface;
+    #renderer: CanvasRenderer;
     #player: Player;
     #bricks: Map<string, BaseBrick>;
     // TODO: increment this when player clears a level
     #level = 2;
 
-    constructor(renderer: RendererInterface) {
+    constructor(renderer: CanvasRenderer, level: number) {
         renderer.setGame(this);
         this.#renderer = renderer;
         this.#player = new Player(this);
@@ -53,8 +52,7 @@ export class Game {
         this.#bricks.delete(id);
     }
 
-    // TODO: eventually remove and allow rendering via game itself
-    getRenderer(): RendererInterface {
+    getRenderer(): CanvasRenderer {
         return this.#renderer;
     }
 
