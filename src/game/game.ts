@@ -1,22 +1,23 @@
 import {Player} from "./objects/player.ts";
 import {Logger} from "../logger/logger.ts";
-import {Chrome} from "./chrome/chrome.ts";
 import type {BaseBrick} from "./objects/brick/baseBrick.ts";
 import {BasicBrick} from "./objects/brick/basicBrick.ts";
 import {GlassBrick} from "./objects/brick/glassBrick.ts";
 import {SteelBrick} from "./objects/brick/steelBrick.ts";
 import {CollisionDetectionService} from "./service/collisionDetectionService.ts";
 import type {Missile} from "./objects/missile.ts";
+import {ChromeEventService} from "./service/chromeEventService.ts";
+import type {CanvasRenderer} from "../renderer/canvas/canvasRenderer.ts";
 
 export class Game {
     #renderer: CanvasRenderer;
     #player: Player;
     #bricks: Map<string, BaseBrick>;
-    // TODO: increment this when player clears a level
-    #level = 2;
+    #level;
 
     constructor(renderer: CanvasRenderer, level: number) {
         renderer.setGame(this);
+        this.#level = level;
         this.#renderer = renderer;
         this.#player = new Player(this);
         this.#bricks = new Map<string, BaseBrick>();
@@ -37,6 +38,10 @@ export class Game {
 
     setPlayer(player: Player): void {
         this.#player = player;
+    }
+
+    getLevel(): number {
+        return this.#level;
     }
 
     getBricks(): BaseBrick[] {
@@ -75,9 +80,29 @@ export class Game {
         ).map(([key]) => key).at(0);
     }
 
+    isComplete(): boolean {
+        return this.#bricks.size === 0;
+    }
+
+    levelComplete(): void {
+        Logger.info(`Level ${this.#level} complete!`);
+        ChromeEventService.emitLevelCompleteEvent(this);
+    }
+
+    removeMissile(): void {
+        this.#player.removeMissile();
+    }
+
+    isFailed(): boolean {
+        const hasRemainingBricks = this.#bricks.size > 0;
+        const isPlayerOutOfMissiles = this.#player.getMissilesLeft() < 1;
+
+        return hasRemainingBricks && isPlayerOutOfMissiles;
+    }
+
     gameOver(): void {
         Logger.info("Game Over!");
-        new Chrome().renderGameOverScreen();
+        ChromeEventService.emitGameOverEvent(this);
     }
 
     #updateMissile(missile: Missile): void {

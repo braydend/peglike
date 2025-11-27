@@ -8,21 +8,29 @@ import type {BaseBrick} from "../../game/objects/brick/baseBrick.ts";
 import {GlassBrick} from "../../game/objects/brick/glassBrick.ts";
 import {BasicBrick} from "../../game/objects/brick/basicBrick.ts";
 import {SteelBrick} from "../../game/objects/brick/steelBrick.ts";
+import {ChromeEventService} from "../../game/service/chromeEventService.ts";
+import {Logger} from "../../logger/logger.ts";
 
 export class CanvasRenderer{
     #context: CanvasRenderingContext2D;
+    #canvas: HTMLCanvasElement;
     #game: Game|undefined = undefined;
 
     constructor(element: HTMLElement) {
         if (!this.#isCanvasElement(element)) {
             throw new Error('Provided element is not a canvas element.');
         }
+        this.#canvas = element;
         const context = element.getContext('2d');
 
         if (!context) {
             throw new Error('Could not get 2D context from canvas element.');
         }
         this.#context = context;
+    }
+
+    getCanvas(): HTMLCanvasElement {
+        return this.#canvas;
     }
 
     getCenter(): { x: number; y: number } {
@@ -183,17 +191,25 @@ export class CanvasRenderer{
     }
 
     #renderMissile(): void {
-        const player = this.#getGameOrThrow().getPlayer();
+        const game = this.#getGameOrThrow();
+        const player = game.getPlayer();
         const missile = player.getMissile();
-        console.debug(missile);
         if (!missile) {
             return;
         }
 
         if (this.#isOutsideCanvas(missile.getPosition())) {
             player.removeMissile();
-            if (player.getMissilesLeft() === 0) {
-                this.#getGameOrThrow().gameOver();
+            if (game.isFailed()) {
+                Logger.debug("Game over");
+                game.getPlayer().getMouseControl().cleanup();
+                game.gameOver();
+            }
+
+            if (game.isComplete()) {
+                Logger.debug("Game complete");
+                game.getPlayer().getMouseControl().cleanup();
+                ChromeEventService.emitLevelCompleteEvent(game);
             }
         }
 
