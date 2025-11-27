@@ -2,7 +2,6 @@ import {
     drawCircle,
     drawEquilateralTriangle, drawRectangle,
 } from "./shapes.ts";
-import type {RendererInterface} from "../rendererInterface.ts";
 import type {Game} from "../../game/game.ts";
 import type {Position} from "../../math/vector.ts";
 import type {BaseBrick} from "../../game/objects/brick/baseBrick.ts";
@@ -10,7 +9,7 @@ import {GlassBrick} from "../../game/objects/brick/glassBrick.ts";
 import {BasicBrick} from "../../game/objects/brick/basicBrick.ts";
 import {SteelBrick} from "../../game/objects/brick/steelBrick.ts";
 
-export class CanvasRenderer implements RendererInterface{
+export class CanvasRenderer{
     #context: CanvasRenderingContext2D;
     #game: Game|undefined = undefined;
 
