@@ -187,7 +187,8 @@ export class Game {
 
     progressLevel(missilesToAdd: number): void {
         this.#level = this.#level + 1;
-        this.#player.addMissiles(missilesToAdd);
+        const totalMissiles = missilesToAdd + this.#player.getMissilesLeft();
+        this.#player = new Player(this, totalMissiles);
         this.#generateBricks();
     }
 }
