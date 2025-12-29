@@ -1,3 +1,16 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
 #mainCanvas {
   border: 2px solid #000;
 }

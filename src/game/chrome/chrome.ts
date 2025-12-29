@@ -6,9 +6,9 @@ export class Chrome {
         this.#addChromeContainer();
     }
 
-    #getAppContainer(): HTMLDivElement {
+    #getAppContainer(): HTMLElement {
         const appElement = document.getElementById('app');
-        if (!appElement || !(appElement instanceof HTMLDivElement)){
+        if (!appElement || !(appElement instanceof HTMLElement)){
             throw new Error('App container element not found.');
         }
         return appElement;
