@@ -14,3 +14,11 @@ html, body {
 #mainCanvas {
   border: 2px solid #000;
 }
+
+.failed {
+    border: 1px solid red;
+}
+
+.success {
+    border: 1px solid green;
+}

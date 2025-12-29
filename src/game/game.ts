@@ -185,9 +185,9 @@ export class Game {
         this.#bricks.set(brick.getId(), brick);
     }
 
-    progressLevel() {
+    progressLevel(missilesToAdd: number): void {
         this.#level = this.#level + 1;
-        this.#player.addMissiles(3);
+        this.#player.addMissiles(missilesToAdd);
         this.#generateBricks();
     }
 }

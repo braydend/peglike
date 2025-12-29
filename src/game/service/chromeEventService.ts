@@ -10,7 +10,7 @@ export class ChromeEventService {
         window.dispatchEvent(new LevelCompleteEvent(game.getLevel()))
     }
 
-    static emitLevelStartEvent(level: number): void {
-        window.dispatchEvent(new LevelStartEvent(level))
+    static emitLevelStartEvent(level: number, prizeBalls: number): void {
+        window.dispatchEvent(new LevelStartEvent(level, prizeBalls))
     }
 }
