@@ -3,24 +3,47 @@ import {MouseControl} from "../../control/mouse.ts";
 import {Missile} from "./missile.ts";
 import {Logger} from "../../logger/logger.ts";
 import {Game} from "../game.ts";
+import {ChromeEventService} from "../service/chromeEventService.ts";
+
+// ChromeEventService.emitUpdateStatsEvent({ballsLeft: target});
+
+function TriggerStatUpdate(
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+) {
+    console.debug("---Triggering stat update", {target, propertyKey, descriptor});
+    const original = descriptor.set;
+
+    descriptor.set = function (value: number) {
+        if(original === undefined) {
+            console.debug("undef");
+            return;
+        }
+        console.debug("---Triggering stat update in decorator", {value, original});
+        ChromeEventService.emitUpdateStatsEvent({ballsLeft: value});
+        original.call(this, value);
+    }
+}
 
 export class Player {
     readonly #game: Game;
     #missile: Missile | undefined;
     #angle: number;
-    #missilesLeft: number;
+    #missilesLeft: number = 0;
     #mouseControl: MouseControl;
 
     constructor(game: Game, missilesLeft = 3) {
         this.#game = game;
         this.#missile = undefined;
         this.#angle = 0;
-        this.#missilesLeft = missilesLeft;
+        this.missilesLeft = missilesLeft;
         this.#mouseControl = this.#registerMouseControlListener();
     }
 
-    addMissiles(count: number): void {
-        this.#missilesLeft += count;
+    @TriggerStatUpdate
+    set missilesLeft(value: number) {
+        this.#missilesLeft = value;
     }
 
     getMouseControl(): MouseControl {
@@ -59,7 +82,8 @@ export class Player {
             5,
         );
         this.#missile = missile;
-        this.#missilesLeft -= 1;
+        this.missilesLeft = this.#missilesLeft - 1;
+        // this.#missilesLeft -= 1;
         Logger.debug(`[Player] firing new missile #${missile.getId()}`);
     }
 

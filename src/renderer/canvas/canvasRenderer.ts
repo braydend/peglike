@@ -124,7 +124,6 @@ export class CanvasRenderer{
             angle: player.getAngle()},
             {
                 strokeColour: player.canFire() ? 'green' : 'red',
-                text: player.getMissilesLeft().toString()
             }
         );
     }

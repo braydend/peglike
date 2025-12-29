@@ -6,12 +6,40 @@ html, body {
 #app {
     display: grid;
     grid-template-rows: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+        ". header ."
+        ". game stats"
+        ". footer ."
+    ;
     place-items: center;
     height: 100%;
 }
 
+h1 {
+    grid-area: header;
+}
+
 #mainCanvas {
-  border: 2px solid #000;
+    grid-area: game;
+    border: 2px solid #000;
+}
+
+#chromeStats {
+    grid-area: stats;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    height: 100%;
+
+    .statValue {
+        text-align: center;
+    }
+}
+
+#chromeFooter {
+    grid-area: footer;
 }
 
 #prizeItemContainer {

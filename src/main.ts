@@ -7,9 +7,11 @@ import {
     LevelCompleteEvent,
     levelCompleteEventName,
     LevelStartEvent,
-    levelStartEventName
+    levelStartEventName, StatsUpdatedEvent, statsUpdatedEventName
 } from "./game/chrome/events.ts";
 import {Chrome} from "./game/chrome/chrome.ts";
+import {Logger} from "./logger/logger.ts";
+import {ChromeEventService} from "./game/service/chromeEventService.ts";
 
 function init(): {gameService: GameService, chrome: Chrome} {
     const canvasElement = document.getElementById('mainCanvas');
@@ -48,6 +50,14 @@ window.addEventListener(levelCompleteEventName, (event) => {
     chrome.renderLevelUpScreen(event.getLevel());
 });
 
+window.addEventListener(statsUpdatedEventName, (event) => {
+    Logger.debug("StatsUpdatedEvent", event);
+    if (!(event instanceof StatsUpdatedEvent)) {
+        return;
+    }
+    chrome.renderStats(event.getStats());
+});
+
 window.addEventListener(levelStartEventName, (event) => {
     if (!(event instanceof LevelStartEvent)) return;
     const currentGame = gameService.getCurrentGame();
@@ -55,4 +65,6 @@ window.addEventListener(levelStartEventName, (event) => {
         throw new Error('Could not find current game');
     }
     currentGame.progressLevel(event.getPrizeBalls());
-})
+});
+
+ChromeEventService.emitUpdateStatsEvent({ballsLeft: gameService.getCurrentGame()?.getPlayer().getMissilesLeft() ?? 0});
