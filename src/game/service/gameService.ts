@@ -14,16 +14,4 @@ export class GameService {
     getCurrentGame(): Game|undefined {
         return this.#currentGame;
     }
-
-    progressLevel(game: Game): Game {
-        const newLevel = game.getLevel() + 1;
-        Logger.debug(`progressing to level ${newLevel}`);
-
-        if (!this.#currentGame) {
-            throw Error(`Cannot progress to level ${newLevel}, current game is missing`);
-        }
-        this.#currentGame.progressLevel();
-
-        return this.#currentGame;
-    }
 }
