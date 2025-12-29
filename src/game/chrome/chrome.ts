@@ -1,6 +1,6 @@
 import {ChromeEventService} from "../service/chromeEventService.ts";
 import {Logger} from "../../logger/logger.ts";
-import {PrizeShop} from "../objects/PrizeShop.ts";
+import {type PrizeItem, PrizeShop} from "../objects/PrizeShop.ts";
 
 export class Chrome {
     constructor() {
@@ -67,17 +67,11 @@ export class Chrome {
         appElement.appendChild(gameOverElement);
     }
 
-    renderLevelUpScreen(completedLevel: number): void{
-        Logger.debug(`Completed Level ${completedLevel}`);
-        Logger.debug('Rendering Level Up screen');
-        const chromeContainer = this.#getChromeContainer()
-        const levelUpElement = document.createElement('div');
-        levelUpElement.id = 'levelUpScreen';
-        const levelUpHeading = document.createElement('h1');
-        levelUpHeading.innerText = `Level ${completedLevel} Complete!`;
+    renderPrizes(chromeContainer: HTMLElement): PrizeItem {
         const prizeHeading = document.createElement('h2');
         prizeHeading.innerText = 'Prizes';
         const prizeContainer = document.createElement('div');
+        prizeContainer.id = 'prizeContainer';
         const prizeShop = new PrizeShop();
         const prizes = prizeShop.getPotentialPrizes();
         prizes.forEach((prize, index) => {
@@ -89,19 +83,97 @@ export class Chrome {
         });
         chromeContainer.appendChild(prizeContainer);
         const selectedPrize = prizeShop.rollPrize();
-        for (let i = 0; i < prizes.length; i++) {
-            const prizeElement = document.getElementById('prizeContainer-' + i);
-            if (!prizeElement) {
-                console.debug("couldn't find prize element", {id: `prizeContainer-${i}`});
-                continue;
-            };
-            if (prizeElement.getAttribute("data-count") !== selectedPrize.balls.toString(10)) {
-                prizeElement.className = "failed";
-                continue;
-            }
-            prizeElement.className = "success"
+
+        // choose which item must win
+        const targetIndex = prizes.findIndex(({balls}) => balls === selectedPrize.balls); // ⭐
+
+// choose how many full spins (randomized)
+        const minLoops = 5;
+        const maxLoops = 25;
+        const loops =
+            Math.floor(Math.random() * (maxLoops - minLoops + 1)) + minLoops;
+
+// total steps chosen so final index matches target
+        const totalSteps =
+            loops * prizes.length + targetIndex;
+        const maxSpinDuration = 5000;
+
+        const start = performance.now();
+
+        function easeOutCubic(t: number) {
+            return 1 - Math.pow(1 - t, 3);
         }
+
+        function spin(now:number, onComplete: () => void) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / maxSpinDuration, 1);
+            const eased = easeOutCubic(progress);
+
+            const step = Math.floor(eased * totalSteps);
+
+            if (step === totalSteps) {
+                console.debug("done spinning");
+                onComplete();
+                return;
+            }
+
+            const prizeIndex = step % prizes.length;
+            const prizeElement = document.getElementById('prizeContainer-' + prizeIndex);
+            if (!prizeElement) {
+                console.debug("couldn't find prize element", {id: `prizeContainer-${prizeIndex}`});
+                return;
+            }
+            const previous = document.getElementById('prizeContainer-' + (prizeIndex - 1)) ?? document.getElementById('prizeContainer-' + (prizes.length-1));
+            if (!previous) {
+                console.debug("couldn't find previous element");
+                return;
+            }
+            console.debug("spin");
+            previous.className = "prizeItem";
+            prizeElement.className = "prizeItem selected";
+
+            if (progress < 1) {
+                requestAnimationFrame((frameTime) => spin(frameTime, onComplete));
+                return;
+            }
+        }
+
+        spin(start, () => {requestAnimationFrame(() => {
+            for (let i = 0; i < prizes.length; i++) {
+                const prizeElement = document.getElementById('prizeContainer-' + i);
+                if (!prizeElement) {
+                    console.debug("couldn't find prize element", {id: `prizeContainer-${i}`});
+                    continue;
+                }
+                if (prizeElement.getAttribute("data-count") !== selectedPrize.balls.toString(10)) {
+                    prizeElement.className = "prizeItem failed";
+                    continue;
+                }
+                prizeElement.className = "prizeItem success"
+            }
+            const levelUpButton = [...document.getElementsByTagName('button')].find((element) => element.id === "levelUpButton");
+            if (!levelUpButton) {
+                console.debug("couldn't find levelUpButton");
+                return;
+            }
+            levelUpButton.disabled = false;
+        })});
+
+        return selectedPrize;
+    }
+
+    renderLevelUpScreen(completedLevel: number): void{
+        Logger.debug(`Completed Level ${completedLevel}`);
+        Logger.debug('Rendering Level Up screen');
+        const chromeContainer = this.#getChromeContainer()
+        const levelUpElement = document.createElement('div');
+        levelUpElement.id = 'levelUpScreen';
+        const levelUpHeading = document.createElement('h1');
+        levelUpHeading.innerText = `Level ${completedLevel} Complete!`;
         const levelUpButton = document.createElement('button');
+        levelUpButton.id = 'levelUpButton';
+        levelUpButton.disabled = true;
+        const selectedPrize = this.renderPrizes(chromeContainer);
         levelUpButton.innerText = 'Next Level';
         levelUpButton.onclick = () => {
             ChromeEventService.emitLevelStartEvent(completedLevel, selectedPrize.balls);

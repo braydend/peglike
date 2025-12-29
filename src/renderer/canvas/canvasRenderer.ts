@@ -208,6 +208,7 @@ export class CanvasRenderer{
 
             if (game.isComplete()) {
                 Logger.debug("Game complete");
+                game.getPlayer().getMouseControl().cleanup();
                 ChromeEventService.emitLevelCompleteEvent(game);
             }
         }

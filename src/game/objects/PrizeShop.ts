@@ -1,4 +1,4 @@
-type PrizeItem = {
+export type PrizeItem = {
     name: string,
     balls: number,
 }

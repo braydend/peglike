@@ -6,7 +6,7 @@ html, body {
 #app {
     display: grid;
     grid-template-rows: 1fr 2fr 1fr;
-    place-content: center;
+    place-items: center;
     height: 100%;
 }
 
@@ -14,10 +14,37 @@ html, body {
   border: 2px solid #000;
 }
 
-.failed {
-    border: 1px solid red;
+#prizeContainer {
+    display: flex;
+    justify-content: space-around;
+    gap: 2rem;
+    flex-direction: row;
 }
+.prizeItem {
+    background-color: unset;
+    padding: 3rem 1rem;
+    border: 3px solid;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    flex-basis: 20%;
+    word-wrap: break-word;
+    text-align: center;
+}
+    .selected {
+        border-color: cornflowerblue;
+        background: deepskyblue;
+    }
 
-.success {
-    border: 1px solid green;
-}
+    .failed {
+        opacity: 40%;
+        border-color: red;
+        background: indianred;
+    }
+
+    .success {
+        background: lightgreen;
+        border-color: green;
+    }
