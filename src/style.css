@@ -4,10 +4,9 @@ html, body {
 }
 
 #app {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-rows: 1fr 2fr 1fr;
+    place-content: center;
     height: 100%;
 }
 
