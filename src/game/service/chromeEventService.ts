@@ -1,5 +1,6 @@
 import type {Game} from "../game.ts";
-import {GameOverEvent, LevelCompleteEvent, LevelStartEvent} from "../chrome/events.ts";
+import {GameOverEvent, LevelCompleteEvent, LevelStartEvent, type Stats, StatsUpdatedEvent} from "../chrome/events.ts";
+import {Logger} from "../../logger/logger.ts";
 
 export class ChromeEventService {
     static emitGameOverEvent(game: Game): void {
@@ -12,5 +13,10 @@ export class ChromeEventService {
 
     static emitLevelStartEvent(level: number, prizeBalls: number): void {
         window.dispatchEvent(new LevelStartEvent(level, prizeBalls))
+    }
+
+    static emitUpdateStatsEvent(stats: Stats): void {
+        Logger.debug("Emitting stat update event", stats)
+        window.dispatchEvent(new StatsUpdatedEvent(stats))
     }
 }

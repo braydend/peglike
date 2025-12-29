@@ -24,6 +24,23 @@ export class LevelCompleteEvent extends LevelAwareEvent {
     }
 };
 
+
+export type Stats = {
+    ballsLeft: number;
+}
+export const statsUpdatedEventName = "StatsUpdatedEvent";
+export class StatsUpdatedEvent extends Event {
+    #stats: Stats;
+    constructor(stats: Stats) {
+        super(statsUpdatedEventName);
+        this.#stats = stats;
+    }
+
+    getStats() {
+        return this.#stats;
+    }
+};
+
 export const levelStartEventName = "LevelStartEvent";
 export class LevelStartEvent extends LevelAwareEvent {
     #prizeBalls: number;

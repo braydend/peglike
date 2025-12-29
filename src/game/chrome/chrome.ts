@@ -2,10 +2,11 @@ import {ChromeEventService} from "../service/chromeEventService.ts";
 import {Logger} from "../../logger/logger.ts";
 import {type PrizeItem, PrizeShop} from "../objects/PrizeShop.ts";
 import {ElementBuilder} from "./elementBuilder.ts";
+import type {Stats} from "./events.ts";
 
 export class Chrome {
     constructor() {
-        this.#addChromeContainer();
+        this.#addChromeContainers();
     }
 
     #getAppContainer(): HTMLElement {
@@ -16,41 +17,41 @@ export class Chrome {
         return appElement;
     }
 
-    #getGameCanvas(): HTMLCanvasElement {
-        const canvasElement = document.getElementById('mainCanvas');
-        if (!canvasElement || !(canvasElement instanceof HTMLCanvasElement)) {
-            throw new Error('Game canvas element not found or is not a canvas.');
-        }
-        return canvasElement;
-    }
-
-    #removeGameCanvas(): void {
+    #addChromeContainers():void {
         const appElement = this.#getAppContainer();
-        const canvasElement = this.#getGameCanvas();
-        appElement.removeChild(canvasElement);
+        ElementBuilder.createDiv(appElement, {id: 'chromeStats'});
+        ElementBuilder.createDiv(appElement, {id: 'chromeFooter'});
     }
 
-    #addChromeContainer():void {
-        const appElement = this.#getAppContainer();
-        ElementBuilder.createDiv(appElement, {id: 'chrome'});
-    }
-
-    #getChromeContainer(): HTMLDivElement {
-        const chromeContainer = document.getElementById('chrome');
-        if (!chromeContainer || !(chromeContainer instanceof HTMLDivElement)){
-            throw new Error('Chrome container element not found.');
+    #getChromeFooterContainer(): HTMLDivElement {
+        const chromeFooterContainer = document.getElementById('chromeFooter');
+        if (!chromeFooterContainer || !(chromeFooterContainer instanceof HTMLDivElement)){
+            throw new Error('Chrome footer container element not found.');
         }
-        return chromeContainer;
+        return chromeFooterContainer;
     }
 
-    renderStats(): void {
+    #getChromeStatsContainer(): HTMLElement {
+        const chromeStatsContainer = document.getElementById('chromeStats');
+        if (!chromeStatsContainer || !(chromeStatsContainer instanceof HTMLDivElement)){
+            throw new Error('Chrome stats container element not found.');
+        }
+        return chromeStatsContainer;
+    }
 
+    renderStats(stats: Stats): void {
+        Logger.debug("clearing chrome stats");
+        this.#getChromeStatsContainer().replaceChildren();
+        Logger.debug("Rendering Stats", {stats});
+        const statsContainer = ElementBuilder.createDiv(this.#getChromeStatsContainer(), {id: 'statsContainer'});
+        ElementBuilder.createHeading(statsContainer, {level: 2, text: "Balls left"});
+        ElementBuilder.createParagraph(statsContainer, {text: stats.ballsLeft.toString(10), className: "statValue"});
+        ElementBuilder.createDiv(statsContainer, {id: 'ballCounter'});
     }
 
     renderGameOverScreen(highestLevel: number): void{
         Logger.debug('Rendering game over screen');
-        const appElement = this.#getAppContainer()
-        this.#removeGameCanvas();
+        const appElement = this.#getChromeFooterContainer()
         const gameOverElement = ElementBuilder.createDiv(appElement, {id: "gameOverScreen"});
         ElementBuilder.createHeading(gameOverElement, {level: 1, text: "Game Over"});
         ElementBuilder.createParagraph(gameOverElement, {
@@ -158,7 +159,7 @@ export class Chrome {
     renderLevelUpScreen(completedLevel: number): void{
         Logger.debug(`Completed Level ${completedLevel}`);
         Logger.debug('Rendering Level Up screen');
-        const chromeContainer = this.#getChromeContainer()
+        const chromeContainer = this.#getChromeFooterContainer()
         const levelUpElement = ElementBuilder.createDiv(chromeContainer, {id: "levelUpScreen"});
         const selectedPrize = this.renderPrizes(levelUpElement);
         ElementBuilder.createHeading(levelUpElement, {
@@ -177,8 +178,7 @@ export class Chrome {
     }
 
     clear(): void {
-        console.debug("clearing chrome");
-        const chromeContainer = this.#getChromeContainer();
-        chromeContainer.replaceChildren();
+        console.debug("clearing chrome footer");
+        this.#getChromeFooterContainer().replaceChildren();
     }
 }
