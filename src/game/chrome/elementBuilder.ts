@@ -7,6 +7,8 @@ type CommonOptions = {
 
 type DivOptions = Partial<CommonOptions>;
 
+type HeadingOptions = Partial<CommonOptions> & {level: 1|2|3|4|5};
+
 type ButtonOptions = Partial<CommonOptions & {
     disabled: boolean;
     onClick: (event: MouseEvent) => void;
@@ -34,6 +36,20 @@ export class ElementBuilder {
         button.innerText = options?.text ?? "";
         button.onclick = options?.onClick ?? null;
         button.disabled = options?.disabled ?? false;
+        if (options?.attributes) {
+            Object.entries(options.attributes).forEach(([key, value]) => {
+                button.setAttribute(key, value);
+            })
+        }
+        parent.appendChild(button);
+        return button;
+    }
+
+    static createHeading(parent: HTMLElement, options: HeadingOptions) {
+        const button = document.createElement(`h${options?.level}`);
+        button.id = options?.id ?? "";
+        button.className = options?.className ?? "";
+        button.innerText = options?.text ?? "";
         if (options?.attributes) {
             Object.entries(options.attributes).forEach(([key, value]) => {
                 button.setAttribute(key, value);
