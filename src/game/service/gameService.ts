@@ -16,7 +16,14 @@ export class GameService {
     }
 
     progressLevel(game: Game): Game {
-        Logger.debug(`progressing to level ${game.getLevel()+1}`);
-        return new Game(game.getRenderer(), game.getLevel() + 1);
+        const newLevel = game.getLevel() + 1;
+        Logger.debug(`progressing to level ${newLevel}`);
+
+        if (!this.#currentGame) {
+            throw Error(`Cannot progress to level ${newLevel}, current game is missing`);
+        }
+        this.#currentGame.progressLevel();
+
+        return this.#currentGame;
     }
 }

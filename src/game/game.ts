@@ -8,6 +8,7 @@ import {CollisionDetectionService} from "./service/collisionDetectionService.ts"
 import type {Missile} from "./objects/missile.ts";
 import {ChromeEventService} from "./service/chromeEventService.ts";
 import type {CanvasRenderer} from "../renderer/canvas/canvasRenderer.ts";
+import {BrickTypes} from "./objects/brick/brickTypes.ts";
 
 export class Game {
     #renderer: CanvasRenderer;
@@ -145,17 +146,48 @@ export class Game {
     }
 
     #getBricksForLevel(): ('basic'|'glass'|'steel')[] {
+        const glassBrickThreshold = 3;
+        const steelBrickThreshold = 6;
         if (this.#level === 1) {
-            return new Array(10).fill('basic');
+            return new Array(this.#level).fill('basic');
         }
 
-        return new Array(11)
-            .fill('basic', 0, 6)
-            .fill('glass', 6,9)
-            .fill('steel',9,10);
+        const bricksTypes = [BrickTypes.Basic];
+        if (this.#level >= glassBrickThreshold) {
+            bricksTypes.push(BrickTypes.Glass);
+        }
+        if (this.#level >= steelBrickThreshold) {
+            bricksTypes.push(BrickTypes.Steel);
+        }
+
+        /*
+         * Naively add one brick each new level
+         * This may need to be updated in the future to ensure levels aren't impossible
+         * e.g. total hits required < level + 1
+         */
+        const randomValue = crypto.getRandomValues(new Int8Array(this.#level));
+        const maxBrickType = bricksTypes.at(-1) ?? 0;
+        const bricksToGenerate = randomValue.map((value) => value % maxBrickType+ 1);
+        console.debug({bricksToGenerate, randomValue, bricksTypes, maxBrickType});
+        return [...bricksToGenerate].map((value) => {
+            switch (value) {
+                case BrickTypes.Glass:
+                    return 'glass';
+                case BrickTypes.Steel:
+                    return 'steel';
+                default:
+                    return 'basic';
+            }
+        })
     }
 
     #addBrick(brick: BaseBrick): void {
         this.#bricks.set(brick.getId(), brick);
+    }
+
+    progressLevel() {
+        this.#level = this.#level + 1;
+        this.#player.addMissiles(3);
+        this.#generateBricks();
     }
 }

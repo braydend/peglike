@@ -8,7 +8,7 @@ export class Player {
     readonly #game: Game;
     #missile: Missile | undefined;
     #angle: number;
-    #missilesLeft: number = 10;
+    #missilesLeft: number = 3;
     #mouseControl: MouseControl;
 
     constructor(game: Game) {
@@ -16,6 +16,10 @@ export class Player {
         this.#missile = undefined;
         this.#angle = 0;
         this.#mouseControl = this.#registerMouseControlListener();
+    }
+
+    addMissiles(count: number): void {
+        this.#missilesLeft += count;
     }
 
     getMouseControl(): MouseControl {
