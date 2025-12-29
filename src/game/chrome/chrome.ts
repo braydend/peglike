@@ -1,6 +1,7 @@
 import {ChromeEventService} from "../service/chromeEventService.ts";
 import {Logger} from "../../logger/logger.ts";
 import {type PrizeItem, PrizeShop} from "../objects/PrizeShop.ts";
+import {ElementBuilder} from "./elementBuilder.ts";
 
 export class Chrome {
     constructor() {
@@ -31,11 +32,7 @@ export class Chrome {
 
     #addChromeContainer():void {
         const appElement = this.#getAppContainer();
-        const chromeContainer = document.createElement('div');
-        chromeContainer.id = 'chrome';
-
-        appElement.appendChild(chromeContainer);
-
+        ElementBuilder.createDiv(appElement, {id: 'chrome'});
     }
 
     #getChromeContainer(): HTMLDivElement {
@@ -46,12 +43,15 @@ export class Chrome {
         return chromeContainer;
     }
 
+    renderStats(): void {
+
+    }
+
     renderGameOverScreen(highestLevel: number): void{
         Logger.debug('Rendering game over screen');
         const appElement = this.#getAppContainer()
         this.#removeGameCanvas();
-        const gameOverElement = document.createElement('div');
-        gameOverElement.id = 'gameOverScreen';
+        const gameOverElement = ElementBuilder.createDiv(appElement, {id: "gameOverScreen"});
         const gameOverHeading = document.createElement('h1');
         gameOverHeading.innerText = 'Game Over';
         const gameOverText = document.createElement('p');
@@ -64,24 +64,22 @@ export class Chrome {
         gameOverElement.appendChild(gameOverHeading);
         gameOverElement.appendChild(gameOverText);
         gameOverElement.appendChild(restartButton);
-        appElement.appendChild(gameOverElement);
+        // appElement.appendChild(gameOverElement);
     }
 
     renderPrizes(chromeContainer: HTMLElement): PrizeItem {
         const prizeHeading = document.createElement('h2');
         prizeHeading.innerText = 'Prizes';
-        const prizeContainer = document.createElement('div');
-        prizeContainer.id = 'prizeContainer';
+        const prizeContainer = ElementBuilder.createDiv(chromeContainer, {id:'prizeContainer'});
         const prizeShop = new PrizeShop();
         const prizes = prizeShop.getPotentialPrizes();
         prizes.forEach((prize, index) => {
-            const prizeElement = document.createElement('div');
-            prizeElement.id = `prizeContainer-${index}`;
-            prizeElement.setAttribute("data-count", prize.balls.toString(10));
-            prizeElement.innerText = prize.name
-            prizeContainer.appendChild(prizeElement);
+            ElementBuilder.createDiv(prizeContainer, {
+                id: `prizeContainer-${index}`,
+                text: prize.name,
+                attributes: { "data-count": prize.balls.toString(10)}
+            });
         });
-        chromeContainer.appendChild(prizeContainer);
         const selectedPrize = prizeShop.rollPrize();
 
         // choose which item must win
@@ -166,8 +164,7 @@ export class Chrome {
         Logger.debug(`Completed Level ${completedLevel}`);
         Logger.debug('Rendering Level Up screen');
         const chromeContainer = this.#getChromeContainer()
-        const levelUpElement = document.createElement('div');
-        levelUpElement.id = 'levelUpScreen';
+        const levelUpElement = ElementBuilder.createDiv(chromeContainer, {id: "levelUpScreen"});
         const levelUpHeading = document.createElement('h1');
         levelUpHeading.innerText = `Level ${completedLevel} Complete!`;
         const levelUpButton = document.createElement('button');
@@ -181,7 +178,6 @@ export class Chrome {
         };
         levelUpElement.appendChild(levelUpHeading);
         levelUpElement.appendChild(levelUpButton);
-        chromeContainer.appendChild(levelUpElement);
     }
 
     clear(): void {
