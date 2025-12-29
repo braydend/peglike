@@ -54,5 +54,5 @@ window.addEventListener(levelStartEventName, (event) => {
     if (!currentGame) {
         throw new Error('Could not find current game');
     }
-    gameService.progressLevel(currentGame);
+    currentGame.progressLevel();
 })

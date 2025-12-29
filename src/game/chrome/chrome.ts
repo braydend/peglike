@@ -67,21 +67,22 @@ export class Chrome {
     }
 
     renderLevelUpScreen(completedLevel: number): void{
+        Logger.debug(`Completed Level ${completedLevel}`);
         Logger.debug('Rendering Level Up screen');
         const chromeContainer = this.#getChromeContainer()
-        const gameOverElement = document.createElement('div');
-        gameOverElement.id = 'levelUpScreen';
-        const gameOverHeading = document.createElement('h1');
-        gameOverHeading.innerText = `Level ${completedLevel} Complete!`;
-        const restartButton = document.createElement('button');
-        restartButton.innerText = 'Next Level';
-        restartButton.onclick = () => {
+        const levelUpElement = document.createElement('div');
+        levelUpElement.id = 'levelUpScreen';
+        const levelUpHeading = document.createElement('h1');
+        levelUpHeading.innerText = `Level ${completedLevel} Complete!`;
+        const levelUpButton = document.createElement('button');
+        levelUpButton.innerText = 'Next Level';
+        levelUpButton.onclick = () => {
             ChromeEventService.emitLevelStartEvent(completedLevel);
             this.clear();
         };
-        gameOverElement.appendChild(gameOverHeading);
-        gameOverElement.appendChild(restartButton);
-        chromeContainer.appendChild(gameOverElement);
+        levelUpElement.appendChild(levelUpHeading);
+        levelUpElement.appendChild(levelUpButton);
+        chromeContainer.appendChild(levelUpElement);
     }
 
     clear(): void {
