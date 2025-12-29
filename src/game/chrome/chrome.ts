@@ -52,8 +52,7 @@ export class Chrome {
         const appElement = this.#getAppContainer()
         this.#removeGameCanvas();
         const gameOverElement = ElementBuilder.createDiv(appElement, {id: "gameOverScreen"});
-        const gameOverHeading = document.createElement('h1');
-        gameOverHeading.innerText = 'Game Over';
+        ElementBuilder.createHeading(gameOverElement, {level: 1, text: "Game Over"});
         const gameOverText = document.createElement('p');
         gameOverText.innerText = `You reached Level ${highestLevel}.`;
         ElementBuilder.createButton(gameOverElement, {
@@ -63,10 +62,9 @@ export class Chrome {
         gameOverElement.appendChild(gameOverText);
     }
 
-    renderPrizes(chromeContainer: HTMLElement): PrizeItem {
-        const prizeHeading = document.createElement('h2');
-        prizeHeading.innerText = 'Prizes';
-        const prizeContainer = ElementBuilder.createDiv(chromeContainer, {id:'prizeContainer'});
+    renderPrizes(container: HTMLElement): PrizeItem {
+        const prizeContainer = ElementBuilder.createDiv(container, {id:'prizeContainer'});
+        ElementBuilder.createHeading(prizeContainer, {level:2, text: "Prizes"})
         const prizeShop = new PrizeShop();
         const prizes = prizeShop.getPotentialPrizes();
         prizes.forEach((prize, index) => {
@@ -161,8 +159,11 @@ export class Chrome {
         Logger.debug('Rendering Level Up screen');
         const chromeContainer = this.#getChromeContainer()
         const levelUpElement = ElementBuilder.createDiv(chromeContainer, {id: "levelUpScreen"});
-        const levelUpHeading = document.createElement('h1');
-        levelUpHeading.innerText = `Level ${completedLevel} Complete!`;
+        const selectedPrize = this.renderPrizes(levelUpElement);
+        ElementBuilder.createHeading(levelUpElement, {
+            level: 2,
+            text: `Level ${completedLevel} Complete!`
+        });
         ElementBuilder.createButton(levelUpElement, {
             id: 'levelUpButton',
             disabled: true,
@@ -172,8 +173,6 @@ export class Chrome {
                 this.clear();
             }
         });
-        const selectedPrize = this.renderPrizes(chromeContainer);
-        levelUpElement.appendChild(levelUpHeading);
     }
 
     clear(): void {
