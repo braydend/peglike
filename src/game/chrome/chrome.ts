@@ -53,22 +53,23 @@ export class Chrome {
         this.#removeGameCanvas();
         const gameOverElement = ElementBuilder.createDiv(appElement, {id: "gameOverScreen"});
         ElementBuilder.createHeading(gameOverElement, {level: 1, text: "Game Over"});
-        const gameOverText = document.createElement('p');
-        gameOverText.innerText = `You reached Level ${highestLevel}.`;
+        ElementBuilder.createParagraph(gameOverElement, {
+            text: `You reached Level ${highestLevel}.`
+        });
         ElementBuilder.createButton(gameOverElement, {
             text: "Restart Game",
-            onClick: window.location.reload
+            onClick: () => window.location.reload()
         });
-        gameOverElement.appendChild(gameOverText);
     }
 
     renderPrizes(container: HTMLElement): PrizeItem {
         const prizeContainer = ElementBuilder.createDiv(container, {id:'prizeContainer'});
         ElementBuilder.createHeading(prizeContainer, {level:2, text: "Prizes"})
+        const prizeItemContainer = ElementBuilder.createDiv(prizeContainer, {id:'prizeItemContainer'});
         const prizeShop = new PrizeShop();
         const prizes = prizeShop.getPotentialPrizes();
         prizes.forEach((prize, index) => {
-            ElementBuilder.createDiv(prizeContainer, {
+            ElementBuilder.createDiv(prizeItemContainer, {
                 id: `prizeContainer-${index}`,
                 text: prize.name,
                 attributes: { "data-count": prize.balls.toString(10)}

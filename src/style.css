@@ -14,7 +14,7 @@ html, body {
   border: 2px solid #000;
 }
 
-#prizeContainer {
+#prizeItemContainer {
     display: flex;
     justify-content: space-around;
     gap: 2rem;

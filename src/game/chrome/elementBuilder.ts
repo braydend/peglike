@@ -6,6 +6,7 @@ type CommonOptions = {
 };
 
 type DivOptions = Partial<CommonOptions>;
+type ParagraphOptions = Partial<CommonOptions>;
 
 type HeadingOptions = Partial<CommonOptions> & {level: 1|2|3|4|5};
 
@@ -17,6 +18,20 @@ type ButtonOptions = Partial<CommonOptions & {
 export class ElementBuilder {
     static createDiv(parent: HTMLElement, options?: DivOptions) {
         const div = document.createElement("div");
+        div.id = options?.id ?? "";
+        div.className = options?.className ?? "";
+        div.innerText = options?.text ?? "";
+        if (options?.attributes) {
+            Object.entries(options.attributes).forEach(([key, value]) => {
+                div.setAttribute(key, value);
+            })
+        }
+        parent.appendChild(div);
+        return div;
+    }
+
+    static createParagraph(parent: HTMLElement, options?: ParagraphOptions) {
+        const div = document.createElement("p");
         div.id = options?.id ?? "";
         div.className = options?.className ?? "";
         div.innerText = options?.text ?? "";
