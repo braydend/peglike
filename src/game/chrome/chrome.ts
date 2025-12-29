@@ -56,15 +56,11 @@ export class Chrome {
         gameOverHeading.innerText = 'Game Over';
         const gameOverText = document.createElement('p');
         gameOverText.innerText = `You reached Level ${highestLevel}.`;
-        const restartButton = document.createElement('button');
-        restartButton.innerText = 'Restart Game';
-        restartButton.onclick = () => {
-            window.location.reload();
-        };
-        gameOverElement.appendChild(gameOverHeading);
+        ElementBuilder.createButton(gameOverElement, {
+            text: "Restart Game",
+            onClick: window.location.reload
+        });
         gameOverElement.appendChild(gameOverText);
-        gameOverElement.appendChild(restartButton);
-        // appElement.appendChild(gameOverElement);
     }
 
     renderPrizes(chromeContainer: HTMLElement): PrizeItem {
@@ -167,17 +163,17 @@ export class Chrome {
         const levelUpElement = ElementBuilder.createDiv(chromeContainer, {id: "levelUpScreen"});
         const levelUpHeading = document.createElement('h1');
         levelUpHeading.innerText = `Level ${completedLevel} Complete!`;
-        const levelUpButton = document.createElement('button');
-        levelUpButton.id = 'levelUpButton';
-        levelUpButton.disabled = true;
+        ElementBuilder.createButton(levelUpElement, {
+            id: 'levelUpButton',
+            disabled: true,
+            text: 'Next level',
+            onClick: () => {
+                ChromeEventService.emitLevelStartEvent(completedLevel, selectedPrize.balls);
+                this.clear();
+            }
+        });
         const selectedPrize = this.renderPrizes(chromeContainer);
-        levelUpButton.innerText = 'Next Level';
-        levelUpButton.onclick = () => {
-            ChromeEventService.emitLevelStartEvent(completedLevel, selectedPrize.balls);
-            this.clear();
-        };
         levelUpElement.appendChild(levelUpHeading);
-        levelUpElement.appendChild(levelUpButton);
     }
 
     clear(): void {
