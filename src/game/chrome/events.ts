@@ -26,7 +26,14 @@ export class LevelCompleteEvent extends LevelAwareEvent {
 
 export const levelStartEventName = "LevelStartEvent";
 export class LevelStartEvent extends LevelAwareEvent {
-    constructor(level: number) {
+    #prizeBalls: number;
+
+    constructor(level: number, prizeBalls: number) {
         super(levelStartEventName, level);
+        this.#prizeBalls = prizeBalls;
+    }
+
+    getPrizeBalls(): number{
+        return this.#prizeBalls;
     }
 };

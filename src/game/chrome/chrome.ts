@@ -1,5 +1,6 @@
 import {ChromeEventService} from "../service/chromeEventService.ts";
 import {Logger} from "../../logger/logger.ts";
+import {PrizeShop} from "../objects/PrizeShop.ts";
 
 export class Chrome {
     constructor() {
@@ -74,10 +75,36 @@ export class Chrome {
         levelUpElement.id = 'levelUpScreen';
         const levelUpHeading = document.createElement('h1');
         levelUpHeading.innerText = `Level ${completedLevel} Complete!`;
+        const prizeHeading = document.createElement('h2');
+        prizeHeading.innerText = 'Prizes';
+        const prizeContainer = document.createElement('div');
+        const prizeShop = new PrizeShop();
+        const prizes = prizeShop.getPotentialPrizes();
+        prizes.forEach((prize, index) => {
+            const prizeElement = document.createElement('div');
+            prizeElement.id = `prizeContainer-${index}`;
+            prizeElement.setAttribute("data-count", prize.balls.toString(10));
+            prizeElement.innerText = prize.name
+            prizeContainer.appendChild(prizeElement);
+        });
+        chromeContainer.appendChild(prizeContainer);
+        const selectedPrize = prizeShop.rollPrize();
+        for (let i = 0; i < prizes.length; i++) {
+            const prizeElement = document.getElementById('prizeContainer-' + i);
+            if (!prizeElement) {
+                console.debug("couldn't find prize element", {id: `prizeContainer-${i}`});
+                continue;
+            };
+            if (prizeElement.getAttribute("data-count") !== selectedPrize.balls.toString(10)) {
+                prizeElement.className = "failed";
+                continue;
+            }
+            prizeElement.className = "success"
+        }
         const levelUpButton = document.createElement('button');
         levelUpButton.innerText = 'Next Level';
         levelUpButton.onclick = () => {
-            ChromeEventService.emitLevelStartEvent(completedLevel);
+            ChromeEventService.emitLevelStartEvent(completedLevel, selectedPrize.balls);
             this.clear();
         };
         levelUpElement.appendChild(levelUpHeading);
@@ -86,9 +113,8 @@ export class Chrome {
     }
 
     clear(): void {
+        console.debug("clearing chrome");
         const chromeContainer = this.#getChromeContainer();
-        for (const child of chromeContainer.children) {
-            child.remove();
-        }
+        chromeContainer.replaceChildren();
     }
 }
