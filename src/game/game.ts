@@ -152,7 +152,7 @@ export class Game {
             return new Array(this.#level).fill('basic');
         }
 
-        const bricksTypes = [BrickTypes.Basic];
+        const bricksTypes: (typeof BrickTypes[keyof typeof BrickTypes])[] = [BrickTypes.Basic];
         if (this.#level >= glassBrickThreshold) {
             bricksTypes.push(BrickTypes.Glass);
         }
